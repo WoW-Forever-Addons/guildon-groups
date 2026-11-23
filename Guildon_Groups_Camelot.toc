@@ -3,7 +3,7 @@
 ## Notes: Part of Guildon: a group finder inside the guild. Post a request for a dungeon, a zone, a quest or an item; members who fit get a toast and join with one click.
 ## Notes-deDE: Teil von Guildon: Gruppensuche in der Gilde. Gesuch für Dungeon, Zone, Quest oder Gegenstand stellen; passende Mitglieder bekommen einen Hinweis und sind mit einem Klick dabei.
 ## Author: DonCoohd
-## Version: 0.2.0
+## Version: 0.2.1
 ## Category: Guild
 ## Category-deDE: Gilde
 ## IconTexture: Interface\Icons\INV_Misc_GroupLooking

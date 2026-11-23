@@ -465,6 +465,32 @@ function ns.GroupRows(r)
   return out
 end
 
+-- the map of a zone as a picture block of the detail (DonCore Art minor 3); one frame, drawn again when the zone or the
+-- width changes
+local banner
+local BANNER_H = 130
+local function ZoneBanner(d, mapID)
+  local Art = ns.Art
+  if not (Art and Art.DrawZoneMap and Art.ZoneArt and Art.ZoneArt(mapID)) then return end
+  if not banner then
+    banner = CreateFrame("Frame")
+    banner.bg = banner:CreateTexture(nil, "BACKGROUND")
+    banner.bg:SetAllPoints(banner)
+    banner.bg:SetColorTexture(0, 0, 0, 0.6)
+    function banner:Layout(w, h)
+      w, h = math.floor(w or 0), h or BANNER_H
+      self:SetSize(math.max(1, w), h)
+      if self.map ~= self.drawnMap or w ~= self.drawnW then
+        self.drawnMap, self.drawnW = self.map, w
+        self.ok = Art.DrawZoneMap(self, self.map, w, h)
+      end
+    end
+  end
+  banner.map = mapID
+  d:Block(banner, BANNER_H)
+  d:Space(4)
+end
+
 local function FillDetail(d, r)
   local title, icon, itemID = ns.RequestTitle(r)
   local pill = r.mine and { L["yours"], "yellow" } or (ns.Joined(r.key) ~= nil and { L["you are in"], "green" }) or { L["open"], "blue" }
@@ -476,8 +502,13 @@ local function FillDetail(d, r)
   end
   d:SetActions(acts)
   d:Begin()
+  -- (23.11.2026, Daniel: "oben könnte ne zonenvorschau ... sein") the zone's world map on top of a zone request
+  if r.cat == "z" then ZoneBanner(d, r.ref) end
   local on = ns.IsOnline(r.owner)
-  d:Line(L["From"], Kit.C.muted, ns.PortraitName(r.owner, r.look) .. "  " .. (on and L["online"] or L["offline"]), on and Kit.C.green or Kit.C.quiet)
+  -- (23.11.2026, Daniel: "bei from was abgeschnitten") the name alone on the right, online or offline in the line under it
+  d:Line(L["From"], Kit.C.muted, ns.PortraitName(r.owner, r.look), Kit.C.body)
+  -- (23.11.2026, Daniel: "online dann bitte rechtsbündig") under the name, on the right
+  d:Line("", Kit.C.muted, on and L["online"] or L["offline"], on and Kit.C.green or Kit.C.quiet)
   d:Line(L["When"], Kit.C.muted, ns.WhenText(r), Kit.C.title)
   d:Line(ns.LeftText(r), Kit.C.quiet)
   if (r.need or 0) > 0 then d:Line(L["Players wanted"], Kit.C.muted, tostring(r.need), Kit.C.title) end
@@ -485,6 +516,11 @@ local function FillDetail(d, r)
   if range then
     local fits = ns.LevelFits(r, ns.MyLevel())
     d:Line(L["Level"], Kit.C.muted, range, fits and Kit.C.green or Kit.C.red)
+  end
+  if r.cat == "q" then
+    local st = ns.QuestState(r.ref)
+    local t = ns.QuestStateText(r.ref)
+    d:Line(L["Me"], Kit.C.muted, t, st == "log" and Kit.C.green or st == "done" and Kit.C.quiet or Kit.C.yellow or Kit.C.title)
   end
   if r.note ~= "" and r.cat ~= "t" then
     d:Section(L["Note"])

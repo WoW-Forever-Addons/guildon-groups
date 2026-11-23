@@ -10,7 +10,7 @@ local L = ns.L
 local Opt = LibStub("DonCore-1.0"):Get("Options", 2)
 
 ns.OPTION_DEFAULTS = {
-  dnd = false, levelFilter = true, roleFilter = true, role1 = "", role2 = "", toast_d = true, toast_z = true, toast_q = true, toast_i = true, toast_t = true,
+  dnd = false, levelFilter = true, roleFilter = true, role1 = "", role2 = "", toast_d = true, toast_r = true, toast_z = true, toast_q = true, toast_i = true, toast_t = true,
   sound = true, chatLine = true, toastSeconds = 12, postChat = true, minimapButton = true, blizzLook = true,
 }
 
@@ -34,7 +34,8 @@ local ITEMS = {
   { key = "dnd", name = "Do not disturb", tip = "No toasts, no sound and no chat line for new requests. The list still shows them. Also: /gng dnd" },
   { key = "levelFilter", name = "Only requests that suit my level",
     tip = "Dungeons from 3 levels under to 12 levels over the level of the last boss, zones around their level range. Quests, items and other requests always count." },
-  { key = "toast_d", name = "Dungeons and raids", tip = "A toast when a member looks for a group for a dungeon or raid." },
+  { key = "toast_d", name = "Dungeons", tip = "A toast when a member looks for a group for a dungeon." },
+  { key = "toast_r", name = "Raids", tip = "A toast when a member looks for a group for a raid." },
   { key = "toast_z", name = "Questing in a zone", tip = "A toast when a member looks for company to quest in a zone." },
   { key = "toast_q", name = "Quests", tip = "A toast when a member looks for help with a quest." },
   { key = "toast_i", name = "Items", tip = "A toast when a member looks for a group to get an item." },
@@ -53,7 +54,7 @@ local ITEMS = {
     tip = "Puts the Guildon Groups window back in the middle of the screen at its first size.", onClick = function() if ns.ResetWindow then ns.ResetWindow() end end },
 }
 
-local TOAST_MAIN = { "role1", "role2", "roleFilter", "dnd", "levelFilter", "toast_d", "toast_z", "toast_q", "toast_i", "toast_t" }
+local TOAST_MAIN = { "role1", "role2", "roleFilter", "dnd", "levelFilter", "toast_d", "toast_r", "toast_z", "toast_q", "toast_i", "toast_t" }
 local HOW_MAIN = { "sound", "chatLine", "toastSeconds", "button:resetToast" }
 local WINDOW_MAIN = { "blizzLook", "minimapButton", "button:resetWindow" }
 

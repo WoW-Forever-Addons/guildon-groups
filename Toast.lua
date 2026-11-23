@@ -48,6 +48,8 @@ end
 local function SubLine(r)
   local parts = { ns.WhenText(r) }
   if (r.need or 0) > 0 then parts[#parts + 1] = L["need %d"]:format(r.need) end
+  -- (23.11.2026) a quest request says whether I have the quest too
+  if r.cat == "q" then local t, c = ns.QuestStateText(r.ref) parts[#parts + 1] = c .. t .. "|r" end
   if r.note ~= "" and r.cat ~= "t" then parts[#parts + 1] = r.note end
   return table.concat(parts, ", ")
 end
@@ -57,7 +59,9 @@ ns.RequestSubLine = SubLine
 function ns.WantsToast(r)
   local db = ns.db
   if db.dnd then return false, "dnd" end
-  if db["toast_" .. r.cat] == false then return false, "category" end
+  -- (23.11.2026, Daniel: "alles einzeln abwählbar") raids have their own switch, apart from dungeons
+  local key = (r.cat == "d" and ns.IsRaid(r.ref)) and "toast_r" or ("toast_" .. r.cat)
+  if db[key] == false then return false, "category" end
   if db.levelFilter ~= false and not ns.LevelFits(r, ns.MyLevel()) then return false, "level" end
   -- (23.11.2026, Daniel: "nur für die Rolle die Toasts") a dungeon group without a free place for my first or second role
   if db.roleFilter ~= false and not ns.RoleFits(r) then return false, "role" end

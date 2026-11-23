@@ -1,5 +1,12 @@
 # Changes
 
+## 0.2.1
+
+- **Zone map:** a request for questing in a zone shows the zone's world map on top of its card, and a piece of it in the list.
+- **Quest requests:** the list, the toast and the card say whether the quest is in your quest log or you already did it.
+- **Toasts for raids:** raids have their own switch, apart from dungeons; every kind of request can be switched off on its own.
+- **Card:** the creator's name is no longer cut off; online or offline stands in the line under it.
+
 ## 0.2.0
 
 - **Your roles:** set the role of your first and second spec (window and options, per character). "I'm in" offers the roles that still have a place.

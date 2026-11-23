@@ -28,6 +28,9 @@ local RAID_ICON = "Interface\\Icons\\INV_Misc_Head_Dragon_01"
 ns.ROLES = { "", "t", "h", "d" }
 ns.ROLE_TEXT = { [""] = "Any role", t = "Tank", h = "Healer", d = "Damage" }
 ns.Art = LibStub("DonCore-1.0"):Get("Art", 1)
+-- (minor 3) the zone map; nil with an older Art of another addon loaded first
+local function ZoneThumb(id) return ns.Art and ns.Art.ZoneThumb and ns.Art.ZoneThumb(id) or nil end
+ns.ZoneThumb = ZoneThumb
 function ns.MyLook() return ns.Art and ns.Art.LookCode() or "" end
 local function CleanLook(v) v = tostring(v or "") return v:match("^%d%d?%d?[mf]$") and v or "" end
 local NOW_TTL, PLAN_TTL = 45 * 60, 2 * 3600
@@ -263,6 +266,27 @@ function ns.QuestName(id)
   return name or L["Quest %d"]:format(id or 0), name ~= nil
 end
 
+-- (23.11.2026, Daniel: "bei den quests requests, anzeigen, ob ich die auch habe") "log" while the quest is in my quest
+-- log, "done" when this character finished it, nil when neither (or the client cannot tell)
+function ns.QuestState(id)
+  id = ns.Num(id)
+  if not id then return nil end
+  local QL = C_QuestLog
+  local idx = QL and ns.Num(ns.Call(QL.GetLogIndexForQuestID, id)) or ns.Num(ns.Call(GetQuestLogIndexByID, id))
+  if idx and idx > 0 then return "log" end
+  local done = QL and QL.IsQuestFlaggedCompleted and ns.Call(QL.IsQuestFlaggedCompleted, id)
+  if done == nil and IsQuestFlaggedCompleted then done = ns.Call(IsQuestFlaggedCompleted, id) end
+  if done == true then return "done" end
+  return nil
+end
+-- the short text and colour of it ("in my log" green, "done" grey, "not in my log" muted)
+function ns.QuestStateText(id)
+  local st = ns.QuestState(id)
+  if st == "log" then return L["in my quest log"], "|cff40d040" end
+  if st == "done" then return L["already done"], "|cff9a9a9a" end
+  return L["not in my quest log"], "|cffc0a060"
+end
+
 function ns.ItemName(id)
   local name = ns.Str(ns.Call(C_Item and C_Item.GetItemInfo or GetItemInfo, id))
   return name or L["Item %d"]:format(id or 0), name ~= nil
@@ -275,7 +299,8 @@ end
 -- title, icon, itemID (the mouse shows the item's tooltip)
 function ns.RequestTitle(r)
   if r.cat == "d" then return ns.DungeonName(r.ref), ns.DungeonIcon(r.ref) or (ns.IsRaid(r.ref) and RAID_ICON or ns.CAT_ICON.d) end
-  if r.cat == "z" then return L["Questing: %s"]:format(ns.ZoneName(r.ref)), ns.CAT_ICON.z end
+  -- (23.11.2026, Daniel: "zonenvorschau ... auch in der liste") a piece of the zone's world map
+  if r.cat == "z" then return L["Questing: %s"]:format(ns.ZoneName(r.ref)), ZoneThumb(r.ref) or ns.CAT_ICON.z end
   if r.cat == "q" then return L["Quest: %s"]:format((ns.QuestName(r.ref))), ns.CAT_ICON.q end
   if r.cat == "i" then return L["Item: %s"]:format((ns.ItemName(r.ref))), ItemIcon(r.ref) or ns.CAT_ICON.i, r.ref end
   return r.note ~= "" and r.note or L["Group request"], ns.CAT_ICON.t
