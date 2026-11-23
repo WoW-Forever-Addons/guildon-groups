@@ -1,5 +1,11 @@
 # Changes
 
+## 0.2.2
+
+- **Quest by its ID:** a quest request can name any quest by its ID or a quest link, also one that is not in your log.
+- **For my level first:** the list starts with the filter "For my level"; "All" is one click away and stays when you choose it.
+- **Close button:** the red X of the request form and the window reacts on its whole face (the title bar covered its left edge).
+
 ## 0.2.1
 
 - **Zone map:** a request for questing in a zone shows the zone's world map on top of its card, and a piece of it in the list.

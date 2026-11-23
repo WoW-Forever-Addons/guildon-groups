@@ -117,7 +117,18 @@ local function QuestItems()
     end
   end
   if #out == 0 then out[1] = { value = 0, text = L["Your quest log is empty."] } end
+  -- (23.11.2026, Elmer Fudd: "Questgesuche per Quest ID wären zusätzlich toll") any quest by its ID, also one not in the log
+  out[#out + 1] = { value = ns.QUEST_BY_ID, text = L["Another quest: by its ID"] }
   return out
+end
+
+-- a quest as the player names it: its ID, a quest link pasted into the field, or "quest:<id>"
+ns.QUEST_BY_ID = -1
+function ns.ParseQuest(text)
+  text = tostring(text or "")
+  local id = text:match("|Hquest:(%d+)") or text:match("quest:(%d+)") or text:match("^%s*(%d+)%s*$")
+  id = tonumber(id)
+  return id and id > 0 and id < 10000000 and id or nil
 end
 
 -- an item as the player names it: its ID, a link pasted into the field, or "item:<id>"
@@ -157,8 +168,9 @@ local FORM_W, LABEL_W = 460, 130
 local ROW = S.button + S.gap
 local WHAT = { d = "dungeon", z = "zone", q = "quest", i = "item" }
 
+local function ById() return form.cat == "q" and form.questKey == ns.QUEST_BY_ID end
 local function FormHeight(err)
-  local rows = 6 + (form.cat ~= "t" and 1 or 0) + ((form.day or 0) > 0 and 1 or 0)
+  local rows = 6 + (form.cat ~= "t" and 1 or 0) + ((form.day or 0) > 0 and 1 or 0) + (ById() and 1 or 0)
   return rows * ROW + (err and 20 or 0)
 end
 
@@ -183,7 +195,7 @@ local function Send()
   local ref = 0
   if cat == "d" then ref = form.dungeonKey or 0
   elseif cat == "z" then ref = form.zoneKey or 0
-  elseif cat == "q" then ref = form.questKey or 0
+  elseif cat == "q" then ref = ById() and (ns.ParseQuest(form.questId:GetText()) or 0) or form.questKey or 0
   elseif cat == "i" then ref = ns.ParseItem(form.item:GetText()) or 0 end
   local when
   if (form.day or 0) > 0 then
@@ -227,6 +239,15 @@ local function LayoutForm(d, w)
   for _, k in pairs(WHAT) do if k ~= what then d[k]:Hide() end end
   d.labels.what:SetText(d.cat == "d" and L["Dungeon"] or d.cat == "z" and L["Zone"] or d.cat == "q" and L["Quest"] or L["Item"])
   if what then Row(d.labels.what, d[what], fw) else d.labels.what:Hide() end
+  -- the ID of another quest, its name right of the field once the game knows it
+  local byId = ById()
+  Row(d.labels.questId, d.questId, 90, byId)
+  d.questName:SetShown(byId)
+  if byId then
+    d.questName:ClearAllPoints()
+    d.questName:SetPoint("TOPLEFT", d.body, "TOPLEFT", fx + 90 + S.gap, -(y - ROW) - 7)
+    FUI.Fit(d.questName, math.max(40, fw - 90 - S.gap))
+  end
   Row(d.labels.day, d.dayBox, fw)
   Row(d.labels.clock, d.clock, 80, (d.day or 0) > 0)
   Row(d.labels.role, d.roleBox, fw)
@@ -250,7 +271,7 @@ local function BuildFormIn()
   form.cat, form.day = "d", 0
   form.labels = {}
   for k, text in pairs({ cat = L["Looking for"], what = L["Dungeon"], day = L["When"], clock = L["Time"], need = L["Players wanted"], role = L["My role"],
-    note = L["Note"], chat = L["Guild chat"] }) do
+    note = L["Note"], chat = L["Guild chat"], questId = L["Quest ID"] }) do
     local fs = FUI.Text(b, "row", Kit.C.muted)
     fs:SetText(text)
     form.labels[k] = fs
@@ -266,7 +287,15 @@ local function BuildFormIn()
   })
   form.dungeon = FUI.Dropdown(b, { items = DungeonItems, get = function() return form.dungeonKey end, set = function(v) form.dungeonKey = v end })
   form.zone = FUI.Dropdown(b, { items = ZoneItems, get = function() return form.zoneKey end, set = function(v) form.zoneKey = v end })
-  form.quest = FUI.Dropdown(b, { items = QuestItems, get = function() return form.questKey end, set = function(v) form.questKey = v end })
+  form.quest = FUI.Dropdown(b, { items = QuestItems, get = function() return form.questKey end, set = function(v) form.questKey = v Relayout() end })
+  form.questName = FUI.Text(b, "row", Kit.C.muted)
+  local function QuestPreview(text)
+    local id = ns.ParseQuest(text)
+    local name, known = id and ns.QuestName(id)
+    form.questName:SetText(id and (known and name or L["Quest %d"]:format(id)) or "")
+  end
+  form.questId = FUI.EditBox(b, { maxLetters = 200, placeholder = L["Quest ID"], clear = true, onChange = QuestPreview })
+  form.questId.Preview = QuestPreview
   form.item = FUI.EditBox(b, { maxLetters = 200, placeholder = L["Item ID, or drag the item here"], clear = true })
   -- an item dragged from the bags onto the field: its ID goes in (our own frame's script)
   form.item:SetScript("OnReceiveDrag", ns.Guard("item drop", function(self)
@@ -343,10 +372,12 @@ function ns.ShowRequestForm(cat)
   form.zoneKey = zones[1] and zones[1].value or nil
   for _, it in ipairs(zones) do if it.value == here then form.zoneKey = here end end
   local quests = QuestItems()
-  form.questKey = quests[1].value
+  form.questKey = quests[1].value ~= 0 and quests[1].value or ns.QUEST_BY_ID
   form.chatKey = ns.db.postChat == false and "n" or "y"
   form.roleKey = (ns.MyRoles())
   form.item:SetValue("")
+  form.questId:SetValue("")
+  form.questName:SetText("")
   form.clock:SetValue("")
   form.need:SetValue("")
   form.note:SetValue("")
@@ -377,7 +408,13 @@ local function State()
   local db = ns.db
   local ok = false
   for _, f in ipairs(ns.GROUP_FILTERS) do if f == db.groupFilter then ok = true end end
-  if not ok then db.groupFilter = "all" end
+  if not ok then db.groupFilter = "level" end
+  -- (0.2.2, Elmer Fudd 23.11.2026: "Show only Requests for my Level") the list starts with "For my level"; once for
+  -- everyone who had the old default "All"
+  if db.filterLevelDefault ~= 1 then
+    if db.groupFilter == "all" then db.groupFilter = "level" end
+    db.filterLevelDefault = 1
+  end
   return db
 end
 
