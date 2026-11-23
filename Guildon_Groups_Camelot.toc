@@ -1,0 +1,37 @@
+## Interface: 16001
+## Title: |cff3fa9f5Guil|rdon: Groups
+## Notes: Part of Guildon: a group finder inside the guild. Post a request for a dungeon, a zone, a quest or an item; members who fit get a toast and join with one click.
+## Notes-deDE: Teil von Guildon: Gruppensuche in der Gilde. Gesuch für Dungeon, Zone, Quest oder Gegenstand stellen; passende Mitglieder bekommen einen Hinweis und sind mit einem Klick dabei.
+## Author: DonCoohd
+## Version: 0.2.0
+## Category: Guild
+## Category-deDE: Gilde
+## IconTexture: Interface\Icons\INV_Misc_GroupLooking
+## SavedVariables: GuildonGroupsDB
+## AddonCompartmentFunc: GuildonGroups_OnAddonCompartmentClick
+## X-Curse-Project-ID: 1825666
+## X-License: Code MIT License, Copyright (c) 2026 DonCoohd (LICENSE.txt). Data/Dungeons.lua: All The Things (MIT) and CMaNGOS classic-db data, GPL v3. Libs/LibStub: public domain.
+
+Libs\LibStub\LibStub.lua
+Libs\DonCore\DonCore.lua
+Libs\DonCore\Style.lua
+Libs\DonCore\Settings.lua
+Libs\DonCore\MinimapButton.lua
+Libs\DonCore\Kit.lua
+Libs\DonCore\Options.lua
+Libs\DonCore\Blizz.lua
+Libs\DonCore\Art.lua
+Locales\enUS.lua
+Locales\deDE.lua
+Core.lua
+Shared\Base.lua
+Shared\Guild.lua
+Shared\Comm.lua
+Data\Dungeons.lua
+Data\Zones.lua
+Groups.lua
+Toast.lua
+Shared\Window.lua
+Pages.lua
+Options.lua
+Shared\Launcher.lua
