@@ -350,7 +350,8 @@ function ns.LeftText(r)
     sec = math.max(0, sec)
     if sec < 3600 then return L["%d min"]:format(math.ceil(sec / 60)) end
     if sec < 2 * 86400 then return L["%d h"]:format(math.floor(sec / 3600 + 0.5)) end
-    return L["%d days"]:format(math.floor(sec / 86400 + 0.5))
+    local d = math.floor(sec / 86400 + 0.5)
+    return d == 1 and L["1 day"] or L["%d days"]:format(d)
   end
   if not r.now and r.when > now then return L["starts in %s"]:format(Span(r.when - now)) end
   return L["%s left"]:format(Span(Expires(r) - now))

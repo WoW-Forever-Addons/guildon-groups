@@ -319,6 +319,8 @@ local function BuildFormIn()
   })
   form.need = FUI.EditBox(b, { numeric = true, min = 0, max = 39, maxLetters = 2, placeholder = "0" })
   form.note = FUI.EditBox(b, { maxLetters = ns.NOTE_MAX, placeholder = L["optional"], clear = true })
+  -- (Daniel 24.11.2026, "So lassen, deutlicher machen") the role counts for this request only; the specs stay as they are
+  form.roleBox:SetTooltip(L["My role"], { L["Only for this request. Your specs stay as they are."] })
   form.chatBox = FUI.Dropdown(b, {
     items = function() return { { value = "y", text = L["Also post one line in the guild chat"] }, { value = "n", text = L["Only for members with Guildon Groups"] } } end,
     get = function() return form.chatKey end,
@@ -549,6 +551,11 @@ local function FillDetail(d, r)
   d:Line(L["When"], Kit.C.muted, ns.WhenText(r), Kit.C.title)
   d:Line(ns.LeftText(r), Kit.C.quiet)
   if (r.need or 0) > 0 then d:Line(L["Players wanted"], Kit.C.muted, tostring(r.need), Kit.C.title) end
+  -- (Daniel 24.11.2026) the role of a request is fixed when it is posted: a hint when it is none of my specs now
+  if r.mine and (r.role or "") ~= "" then
+    local a, b = ns.MyRoles()
+    if a ~= "" and r.role ~= a and r.role ~= b then d:Line(L["Role differs from your specs"], Kit.C.quiet) end
+  end
   local range = LevelText(r)
   if range then
     local fits = ns.LevelFits(r, ns.MyLevel())
@@ -592,7 +599,7 @@ function Refresh()
   page.dnd:SetText(db.dnd and L["Do not disturb: on"] or L["Do not disturb: off"])
   if page.dnd.SetSelected then page.dnd:SetSelected(db.dnd and true or false) end
   page.list:SetItems(data)
-  page.count:SetText(L["%d requests"]:format(n))
+  page.count:SetText(n == 1 and L["1 request"] or L["%d requests"]:format(n)) -- (24.11.2026, as Crafts "1 wishes")
   local sel = page.selected
   if sel and not ns.Request(sel) then sel = nil page.overlay = nil end
   page.selected = sel

@@ -1,4 +1,4 @@
-local M = LibStub("DonCore-1.0"):NewModule("Art", 3)
+local M = LibStub("DonCore-1.0"):NewModule("Art", 4)
 if not M then return end
 
 ---------------------------------------------------------------------------
@@ -58,6 +58,14 @@ local ICON_CANDIDATES = {
   [2999] = { "Spell_Shadow_RaiseDead", "INV_Misc_Bone_HumanSkull_01", "Spell_Shadow_AnimateDead" }, -- Ruins of Lordaeron
   [2959] = { "Spell_Arcane_Blink", "Spell_Holy_MagicalSentry", "Spell_Nature_WispSplode" },        -- City of Dalaran
   [2998] = { "Trade_Mining", "INV_Pick_02", "INV_Misc_Shovel_01" },                                -- Excavation Site
+  -- (minor 4, 23.11.2026, Daniel: Krol'dok Stronghold in Riverglades ohne Bild) the other new Forever dungeons: the client's
+  -- Dungeon Finder and Encounter Journal have no picture for them (LFGDungeons IconTextureFileID 0, build 1.60.1.71037)
+  [3039] = { "Ability_Hunter_Pet_Crocolisk", "Spell_Shadow_Twilight", "INV_Misc_MonsterScales_05" },  -- Krol'dok Stronghold
+  [2970] = { "Spell_Frost_SummonWaterElemental", "INV_Misc_Idol_03", "Ability_Hunter_Pet_WindSerpent" }, -- The Drowned City
+  [2974] = { "Spell_Nature_StrangleVines", "INV_Misc_Root_02", "Ability_Hunter_Pet_Bear" },        -- Blackmaw Hold
+  [2994] = { "INV_Misc_Key_03", "Spell_Frost_ChainsOfIce", "INV_Misc_Key_01" },                 -- Alcaz Prison
+  [3001] = { "Ability_Hunter_Pet_Raptor", "INV_Misc_Orb_03", "Spell_Nature_EarthQuake" },        -- The Shaper's Terrace
+  [3109] = { "INV_Misc_Bone_HumanSkull_01", "Spell_Shadow_GatherShadows", "Spell_Shadow_DeathScream" }, -- Manor Mistmantle
   [741] = { "Spell_Fire_LavaSpawn", "Spell_Fire_Incinerate" },                                     -- Molten Core
   [742] = { "INV_Misc_Head_Dragon_Black", "INV_Misc_Head_Dragon_01" },                             -- Blackwing Lair
   [760] = { "INV_Misc_Head_Dragon_01", "INV_Misc_Head_Dragon_Black" },                             -- Onyxia's Lair

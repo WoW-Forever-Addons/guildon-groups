@@ -4,8 +4,7 @@ local L = ns.L
 ---------------------------------------------------------------------------
 -- Guildon Groups's options in DonCore's shared options window (20.11.2026): which requests show a toast (one switch per
 -- category, the level rule, do not disturb), how (sound, chat line, how long), and the window. The cog in the window's
--- header, /gng options and the Blizzard AddOns page open it. With the option blizzLook (on by default) and the game's
--- templates at login the same options are pages in the game's settings (DonCore Settings fullPages).
+-- header and /gng options open it. Blizzard's AddOns list has a short page with one button that opens it (DonCore Settings 7).
 ---------------------------------------------------------------------------
 local Opt = LibStub("DonCore-1.0"):Get("Options", 2)
 
@@ -47,7 +46,7 @@ local ITEMS = {
     options = function() return { { 8, L["%d seconds"]:format(8) }, { 12, L["%d seconds"]:format(12) }, { 20, L["%d seconds"]:format(20) } } end },
   { kind = "button", optKey = "button:resetToast", name = "Reset toast position", button = "Reset",
     tip = "Puts the toast back to the top of the screen. Drag a toast to move it.", onClick = function() ns.db.toast = {} end },
-  { header = "Window" },
+  { header = "Windows" },
   ns.LookOption({ addon = "Guildon Groups", category = "Guildon: Groups" }),
   { key = "minimapButton", name = "Minimap button", tip = "Shows the Guildon button at the minimap. All Guildon parts share it." },
   { kind = "button", optKey = "button:resetWindow", name = "Reset window position", button = "Reset",
@@ -58,7 +57,7 @@ local TOAST_MAIN = { "role1", "role2", "roleFilter", "dnd", "levelFilter", "toas
 local HOW_MAIN = { "sound", "chatLine", "toastSeconds", "button:resetToast" }
 local WINDOW_MAIN = { "blizzLook", "minimapButton", "button:resetWindow" }
 
--- one change, from DonCore's window or the game's settings
+-- one change, from DonCore's window
 local function Changed(key)
   if key == "minimapButton" then if ns.RefreshMinimapButton then ns.RefreshMinimapButton() end
   elseif key == "dnd" then ns.SetDND(ns.db.dnd) return
@@ -118,7 +117,6 @@ local function Register()
     end,
     T = function(s) return L[s] end,
     labels = function(s) return L[s] end,
-    redirect = function() return ns.OpenGameOptions and ns.OpenGameOptions() or false end,
   })
 end
 
@@ -131,49 +129,17 @@ function ns.LookChanged()
 end
 
 ---------------------------------------------------------------------------
--- The game's settings: the same items as pages, built at login when the option blizzLook is on and the client has the
--- game's templates (else nothing there). A change of the option works for the options after a /reload.
+-- (24.11.2026, Daniel: only the options window of the addon) Blizzard's AddOns list gets a short page with one button
+-- that opens our window (DonCore Settings 7); the pages themselves live in DonCore's window only.
 ---------------------------------------------------------------------------
-local category, fullPages = nil, false
-
-local function ItemOf(key)
-  for _, it in ipairs(ITEMS) do if it.key == key or it.optKey == key then return it end end
-end
-local function PageItems(keys)
-  local out = {}
-  for _, k in ipairs(keys) do out[#out + 1] = ItemOf(k) end
-  return out
-end
-
-local function GamePages()
-  return {
-    { title = "Toasts", tip = "Your roles and which group requests of the guild show a toast.", items = PageItems(TOAST_MAIN) },
-    { title = "How", tip = "Sound, chat line and how long a toast stays.", items = PageItems(HOW_MAIN) },
-    { title = "Window", tip = "The look of the windows, the minimap button of all Guildon parts and the place of the window.",
-      items = PageItems(WINDOW_MAIN) },
-  }
-end
-ns.GameOptionPages = GamePages -- (tests)
-
 local function BuildGameOptions()
-  category, fullPages = nil, false
-  if not (ns.BuildSettings and ns.db and ns.db.blizzLook ~= false and ns.LookKit and select(2, ns.LookKit())) then return end
-  category = ns.BuildSettings({ name = "Guildon: Groups", ownWindow = true, fullPages = true,
-    status = Status, tools = Tools(), pages = GamePages(),
+  if not (ns.BuildSettings and ns.db) then return end
+  ns.BuildSettings({ name = ns.OPTIONS_ID, ownWindow = true,
+    status = Status,
     db = function() return ns.db end, default = function(key) return ns.OPTION_DEFAULTS[key] end, changed = Changed,
     T = function(s) return L[s] end })
-  fullPages = category ~= nil
 end
 ns.BuildGameOptions = BuildGameOptions -- (tests)
-
--- true when the game's settings were opened at Guildon Groups
-function ns.OpenGameOptions()
-  if not (ns.db and ns.db.blizzLook ~= false and fullPages and category and Settings and Settings.OpenToCategory) then return false end
-  if InCombatLockdown and InCombatLockdown() then ns.Print(L["Not in combat."]) return true end
-  Settings.OpenToCategory(category:GetID())
-  return true
-end
-function ns.OptionsLook() return fullPages and "game settings" or "don window" end
 
 function ns.OpenOptions(tab)
   if Opt and Opt.Open then Opt.Open(ns.OPTIONS_ID, tab) return true end

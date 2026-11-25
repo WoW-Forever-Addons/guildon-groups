@@ -1,5 +1,13 @@
 # Changes
 
+## 0.2.3
+
+- **Smoother play:** the guild roster is read in small slices over several frames, so a large guild no longer causes a short stutter.
+- **Pictures for the new instances:** Krol'dok Stronghold, The Drowned City, Blackmaw Hold, Alcaz Prison, The Shaper's Terrace and Manor Mistmantle now have a dungeon picture in the lists and requests.
+- **My role:** the role in a request is explained in a tooltip ("Only for this request. Your specs stay as they are."), and your own request shows a hint when the role differs from your specs.
+- **Options in their own window:** the options button, the gear, `/gng options` and the minimap menu open only the Groups options window. The game's AddOns list keeps a single button that leads there.
+- **Tabs and list headers in the game's look**, and "1 request" in the singular.
+
 ## 0.2.2
 
 - **Quest by its ID:** a quest request can name any quest by its ID or a quest link, also one that is not in your log.
